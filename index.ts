@@ -11,6 +11,7 @@ import { routerSchedule } from "./routes/schedule.routes";
 import { routerBanner } from "./routes/banner.routes";
 import { routerTag } from "./routes/tag.routes";
 import { routerProduct } from "./routes/product.routes";
+import fs from "fs";
 
 dotenv.config();
 
@@ -21,9 +22,16 @@ db.initialize()
     .then(() => console.log("Database is connected"))
     .catch((err) => console.log(err));
 
+const dir = './uploads';
+
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir);
+}
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static("uploads"));
 
 app.use('/api/v1/category', routerCategory);
 app.use('/api/v1/rol', routerRole);

@@ -56,7 +56,20 @@ export const deleteTag = async (req: Request, res: Response) => {
     console.log(req.params.id);
     
     try {
-        const tagOne = await Tag.findOneBy({ id: +req.params.id });
+        
+        
+        const tagOne = await Tag.findOne({ 
+            where: { id: +req.params.id }, 
+            relations: ["products"] 
+        });
+
+        if (!tagOne) {
+            throw new Error("Tag no encontrada");
+        }
+
+        if(tagOne.products.length > 0){
+            throw new Error("No se puede eliminar una etiqueta con productos");
+        }
 
         await tagOne?.remove();
         res.json({
