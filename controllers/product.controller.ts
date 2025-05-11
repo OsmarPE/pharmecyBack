@@ -96,6 +96,8 @@ export const createProduct = async (req: Request, res: Response) => {
 
 export const updateProduct = async (req: Request, res: Response) => {
     try {
+        console.log(req.body);
+        
         const product = await Product.findOne({
             where: { id: +req.params.id },
             relations: ["category", "tags"]
@@ -114,14 +116,19 @@ export const updateProduct = async (req: Request, res: Response) => {
         if (req?.body?.priceDiscount == 0 || req?.body?.priceDiscount) {
             priceDiscount = req.body.priceDiscount ;
         }
+
+         if(fs.existsSync(`./uploads/${product.image}`)){
+            fs.unlinkSync(`./uploads/${product.image}`);
+        }
+        console.log(req.body);
         
-        product.name = req.body.name || product.name;
-        product.priceBase = priceBase
+        product.name = req.body?.name ?? product.name;
+        product.priceBase = priceBase 
         product.priceDiscount = priceDiscount
-        product.sku = req.body.sku || product.sku;
-        product.category = req.body.category || product.category;
-        product.image = req.body.image || product.image;
-        product.tags = req.body.tags || product.tags;
+        product.sku = req.body?.sku ?? product.sku;
+        product.category = req.body?.category ?? product.category;
+        product.image = req.file?.filename ?? product.image;
+        product.tags = req.body?.tags ? JSON.parse(req.body?.tags) : product.tags;
         await product.save();
         res.json({
             message: "Producto actualizado correctamente",
