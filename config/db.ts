@@ -11,7 +11,7 @@ export const db = new DataSource({
   port: PORT,
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
-  database: "pharmacy",
+  database: process.env.DB_NAME,
   entities: [__dirname + "/../models/**/*.ts"],
   synchronize: true,
   logging: false,
