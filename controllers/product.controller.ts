@@ -6,30 +6,62 @@ import { Branch } from "../models/Branch";
 import { BranchProduct } from "../models/ProductBranch";
 import { Category } from "../models/Category";
 import fs from "fs";
+import { Like } from "typeorm";
 export const getAllProducts = async (req: Request, res: Response) => {
     try {
 
         const branchid = req.query?.branch ?? "all"; 
+        const search = req.query?.search ?? "";
         let products: any[] = [];
         if(branchid === "all"){
+            if (!search) {
             products = await Product.find({
                 relations: ["category", "tags", "branchProducts.branch"]
             });
+            }else{
+           
+            products = await Product.find({
+                where: {
+                    name: Like(`%${search}%`)
+                },
+                relations: ["category", "tags", "branchProducts.branch"]
+            });
+            }
         }else{
 
-            let branchInventory = await BranchProduct.find({
-                where: { branch: { id: +branchid } },
-                relations: ["product", "product.category", "product.tags"]
-              });
+            if (!search) {
+
+                let branchInventory = await BranchProduct.find({
+                    where: { branch: { id: +branchid } },
+                    relations: ["product", "product.category", "product.tags"]
+                  });
+        
+                branchInventory = branchInventory.map((item: any) => ({
+                    ...item.product,
+                    amount: item.amount,
+                    branchProduct: item.id
     
-            branchInventory = branchInventory.map((item: any) => ({
-                ...item.product,
-                amount: item.amount,
-                branchProduct: item.id
+                }));
+    
+                products = branchInventory
+            }else{
+                let branchInventory = await Product.find({
+                    where: {
+                        name: Like(`%${search}%`)
+                    },
+                    relations: ["category", "tags", "branchProducts.branch"]
+                  });
+        
+                branchInventory = branchInventory.map((item: any) => ({
+                    ...item,
+                    amount: item.amount,
+                    branchProduct: item.id
+    
+                }));
+    
+                products = branchInventory
+            }
 
-            }));
-
-            products = branchInventory
              
         }
         res.json({

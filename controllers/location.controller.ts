@@ -1,7 +1,6 @@
 
 import { Request, Response } from "express";
 import { Location } from "../models/Location";
-import { db } from "../config/db";
 
 export const getAllLocations = async (req: Request, res: Response) => {
     try {
